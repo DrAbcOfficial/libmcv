@@ -3,6 +3,7 @@
 #endif
 #define _MCVLibrary_included
 
+#include <sdktools>
 #include <libmcv/zombie>
 
 /**
