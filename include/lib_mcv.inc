@@ -102,6 +102,12 @@ native bool MCV_IsFollowingEntity(int entity);
  */
 native void MCV_StopFollowingEntity(int entity);
 
+/**
+ * CVietnam_Player::SetModel
+ * @param entity entity
+ */
+native void MCV_PlayerSetModel(int client, char[] model);
+
 public SharedPlugin __pl_lib_mcv = {
     name = "Lib MCV",
     file = "lib_mcv.smx",

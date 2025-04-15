@@ -22,18 +22,42 @@ public Plugin myinfo =
 #include "libmcv/zombie.sp"
 
 DynLib g_pServerLib;
-Handle g_hSetParentAttachment;
+
 
 // ViewModel
 Handle g_hCBasePlayerGetViewModel;
+public int Native_GetPlayerViewModel(Handle plugin, int args)
+{
+    int client = GetNativeCell(1);
+    int pass   = GetNativeCell(2);
+    int view   = SDKCall(g_hCBasePlayerGetViewModel, client, pass);
+    return view;
+}
 Handle g_hCBasePlayerCreateViewModel;
+public int Native_CreatePlayerViewModel(Handle plugin, int args)
+{
+    int client = GetNativeCell(1);
+    int pass   = GetNativeCell(2);
+    SDKCall(g_hCBasePlayerCreateViewModel, client, pass);
+    return INVALID_ENT_REFERENCE;
+}
+
+// Player
+Handle g_hCVietnam_PlayerSetModel;
+public int Native_CVietnam_PlayerSetModel(Handle plugin, int args)
+{
+    int clinet = GetNativeCell(1);
+    int cmd_length;
+    GetNativeStringLength(2, cmd_length);
+    cmd_length++;
+    char[] cmd = new char[cmd_length];
+    GetNativeString(2, cmd, cmd_length);
+    SDKCall(g_hCVietnam_PlayerSetModel, clinet, cmd);
+    return INVALID_ENT_REFERENCE;
+}
 
 // Follow
-Handle g_hCBaseEntityFollowEntity;
-Handle g_hCBaseEntityGetFollowedEntity;
-Handle g_hCBaseEntityIsFollowingEntity;
-Handle g_hCBaseEntityStopFollowingEntity;
-
+Handle g_hSetParentAttachment;
 public int Native_SetParentAttachment(Handle plugin, int args)
 {
     int entity = GetNativeCell(1);
@@ -51,23 +75,7 @@ public int Native_SetParentAttachment(Handle plugin, int args)
     SDKCall(g_hSetParentAttachment, entity, cmd, attach, offset);
     return INVALID_ENT_REFERENCE;
 }
-
-public int Native_GetPlayerViewModel(Handle plugin, int args)
-{
-    int client = GetNativeCell(1);
-    int pass   = GetNativeCell(2);
-    int view   = SDKCall(g_hCBasePlayerGetViewModel, client, pass);
-    return view;
-}
-
-public int Native_CreatePlayerViewModel(Handle plugin, int args)
-{
-    int client = GetNativeCell(1);
-    int pass   = GetNativeCell(2);
-    SDKCall(g_hCBasePlayerCreateViewModel, client, pass);
-    return INVALID_ENT_REFERENCE;
-}
-
+Handle g_hCBaseEntityFollowEntity;
 public int Native_FollowEntity(Handle plugin, int args)
 {
     int  entity = GetNativeCell(1);
@@ -76,21 +84,21 @@ public int Native_FollowEntity(Handle plugin, int args)
     SDKCall(g_hCBaseEntityFollowEntity, entity, follow, merge);
     return INVALID_ENT_REFERENCE;
 }
-
+Handle g_hCBaseEntityGetFollowedEntity;
 public int Native_GetFollowedEntity(Handle plugin, int args)
 {
     int entity   = GetNativeCell(1);
     int followed = SDKCall(g_hCBaseEntityGetFollowedEntity, entity);
     return followed;
 }
-
+Handle g_hCBaseEntityIsFollowingEntity;
 public int Native_IsFollowingEntity(Handle plugin, int args)
 {
     int  entity = GetNativeCell(1);
     bool yes    = SDKCall(g_hCBaseEntityIsFollowingEntity, entity);
     return yes;
 }
-
+Handle g_hCBaseEntityStopFollowingEntity;
 public int Native_StopFollowingEntity(Handle plugin, int args)
 {
     int entity = GetNativeCell(1);
@@ -109,6 +117,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("MCV_GetFollowedEntity", Native_GetFollowedEntity);
     CreateNative("MCV_IsFollowingEntity", Native_IsFollowingEntity);
     CreateNative("MCV_StopFollowingEntity", Native_StopFollowingEntity);
+
+    CreateNative("MCV_PlayerSetModel", Native_CVietnam_PlayerSetModel);
 
     ZM_AskPluginLoad();
 
@@ -164,6 +174,12 @@ public void OnPluginStart()
     PrepSDKCall_SetAddress(stopfollowingentity);
     g_hCBaseEntityStopFollowingEntity = EndPrepSDKCall();
 
+    Address cvietname_playersetmodel     = g_pServerLib.ResolveSymbol("_ZN15CVietnam_Player8SetModelEPKc");
+    StartPrepSDKCall(SDKCall_Player);
+    PrepSDKCall_SetAddress(cvietname_playersetmodel);
+    PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+    g_hCVietnam_PlayerSetModel = EndPrepSDKCall();
+
     ZM_OnPluginStart();
 }
 
@@ -180,6 +196,8 @@ public void OnPluginEnd()
     g_hCBaseEntityGetFollowedEntity.Close();
     g_hCBaseEntityIsFollowingEntity.Close();
     g_hCBaseEntityStopFollowingEntity.Close();
+
+    g_hCVietnam_PlayerSetModel.Close();
 
     ZM_OnPluginEnd();
 }
