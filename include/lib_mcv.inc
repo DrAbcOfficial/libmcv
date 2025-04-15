@@ -104,9 +104,24 @@ native void MCV_StopFollowingEntity(int entity);
 
 /**
  * CVietnam_Player::SetModel
- * @param entity entity
+ * @param client client
+ * @param model model
  */
 native void MCV_PlayerSetModel(int client, char[] model);
+
+/**
+ * CVietnam_Player::Weapon_Hide
+ * @param client client
+ * @param weapon weapon
+ */
+native void MCV_PlayerWeapon_Hide(int client, char[] weapon);
+
+/**
+ * CBaseViewModel::GetOwningWeapon
+ * @param entity entity
+ * @return weapon entity
+ */
+native int  MCV_ViewmodelGetOwningWeapon(int entity);
 
 public SharedPlugin __pl_lib_mcv = {
     name = "Lib MCV",

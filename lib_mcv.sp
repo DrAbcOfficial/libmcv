@@ -23,17 +23,17 @@ public Plugin myinfo =
 
 DynLib g_pServerLib;
 
-
 // ViewModel
-Handle g_hCBasePlayerGetViewModel;
-public int Native_GetPlayerViewModel(Handle plugin, int args)
+Handle g_hCBaseViewModelGetOwningWeapon;
+
+public int Native_CBaseViewModelGetOwningWeapon(Handle plugin, int args)
 {
-    int client = GetNativeCell(1);
-    int pass   = GetNativeCell(2);
-    int view   = SDKCall(g_hCBasePlayerGetViewModel, client, pass);
-    return view;
+    int entity = GetNativeCell(1);
+    int weapon = SDKCall(g_hCBaseViewModelGetOwningWeapon, entity);
+    return weapon;
 }
 Handle g_hCBasePlayerCreateViewModel;
+
 public int Native_CreatePlayerViewModel(Handle plugin, int args)
 {
     int client = GetNativeCell(1);
@@ -41,9 +41,19 @@ public int Native_CreatePlayerViewModel(Handle plugin, int args)
     SDKCall(g_hCBasePlayerCreateViewModel, client, pass);
     return INVALID_ENT_REFERENCE;
 }
+Handle g_hCBasePlayerGetViewModel;
+
+public int Native_GetPlayerViewModel(Handle plugin, int args)
+{
+    int client = GetNativeCell(1);
+    int pass   = GetNativeCell(2);
+    int view   = SDKCall(g_hCBasePlayerGetViewModel, client, pass);
+    return view;
+}
 
 // Player
 Handle g_hCVietnam_PlayerSetModel;
+
 public int Native_CVietnam_PlayerSetModel(Handle plugin, int args)
 {
     int clinet = GetNativeCell(1);
@@ -55,9 +65,35 @@ public int Native_CVietnam_PlayerSetModel(Handle plugin, int args)
     SDKCall(g_hCVietnam_PlayerSetModel, clinet, cmd);
     return INVALID_ENT_REFERENCE;
 }
+Handle g_hCVietnam_PlayerWeapon_Hide;
 
+public int Native_CVietnam_PlayerWeapon_Hide(Handle plugin, int args)
+{
+    int clinet = GetNativeCell(1);
+    int cmd_length;
+    GetNativeStringLength(2, cmd_length);
+    cmd_length++;
+    char[] cmd = new char[cmd_length];
+    GetNativeString(2, cmd, cmd_length);
+    SDKCall(g_hCVietnam_PlayerWeapon_Hide, clinet, cmd);
+    return INVALID_ENT_REFERENCE;
+}
+Handle g_hCVietnam_PlayerWeapon_Unhide;
+
+public int Native_CVietnam_PlayerWeapon_Unhide(Handle plugin, int args)
+{
+    int clinet = GetNativeCell(1);
+    int cmd_length;
+    GetNativeStringLength(2, cmd_length);
+    cmd_length++;
+    char[] cmd = new char[cmd_length];
+    GetNativeString(2, cmd, cmd_length);
+    SDKCall(g_hCVietnam_PlayerWeapon_Unhide, clinet, cmd);
+    return INVALID_ENT_REFERENCE;
+}
 // Follow
 Handle g_hSetParentAttachment;
+
 public int Native_SetParentAttachment(Handle plugin, int args)
 {
     int entity = GetNativeCell(1);
@@ -76,6 +112,7 @@ public int Native_SetParentAttachment(Handle plugin, int args)
     return INVALID_ENT_REFERENCE;
 }
 Handle g_hCBaseEntityFollowEntity;
+
 public int Native_FollowEntity(Handle plugin, int args)
 {
     int  entity = GetNativeCell(1);
@@ -85,6 +122,7 @@ public int Native_FollowEntity(Handle plugin, int args)
     return INVALID_ENT_REFERENCE;
 }
 Handle g_hCBaseEntityGetFollowedEntity;
+
 public int Native_GetFollowedEntity(Handle plugin, int args)
 {
     int entity   = GetNativeCell(1);
@@ -92,6 +130,7 @@ public int Native_GetFollowedEntity(Handle plugin, int args)
     return followed;
 }
 Handle g_hCBaseEntityIsFollowingEntity;
+
 public int Native_IsFollowingEntity(Handle plugin, int args)
 {
     int  entity = GetNativeCell(1);
@@ -99,6 +138,7 @@ public int Native_IsFollowingEntity(Handle plugin, int args)
     return yes;
 }
 Handle g_hCBaseEntityStopFollowingEntity;
+
 public int Native_StopFollowingEntity(Handle plugin, int args)
 {
     int entity = GetNativeCell(1);
@@ -112,6 +152,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     CreateNative("MCV_GetPlayerViewModel", Native_GetPlayerViewModel);
     CreateNative("MCV_CreatePlayerViewModel", Native_CreatePlayerViewModel);
+    CreateNative("MCV_ViewmodelGetOwningWeapon", Native_CBaseViewModelGetOwningWeapon);
 
     CreateNative("MCV_FollowEntity", Native_FollowEntity);
     CreateNative("MCV_GetFollowedEntity", Native_GetFollowedEntity);
@@ -119,6 +160,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("MCV_StopFollowingEntity", Native_StopFollowingEntity);
 
     CreateNative("MCV_PlayerSetModel", Native_CVietnam_PlayerSetModel);
+    CreateNative("MCV_PlayerWeapon_Hide", Native_CVietnam_PlayerWeapon_Hide);
+    CreateNative("MCV_PlayerWeapon_Unhide", Native_CVietnam_PlayerWeapon_Unhide);
 
     ZM_AskPluginLoad();
 
@@ -144,7 +187,13 @@ public void OnPluginStart()
     PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
     g_hCBasePlayerGetViewModel = EndPrepSDKCall();
 
-    Address createviewmodel    = g_pServerLib.ResolveSymbol("_ZN15CVietnam_Player15CreateViewModelEi");
+    Address getowningweapon    = g_pServerLib.ResolveSymbol("_ZN14CBaseViewModel15GetOwningWeaponEv");
+    StartPrepSDKCall(SDKCall_Entity);
+    PrepSDKCall_SetAddress(getowningweapon);
+    PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+    g_hCBaseViewModelGetOwningWeapon = EndPrepSDKCall();
+
+    Address createviewmodel          = g_pServerLib.ResolveSymbol("_ZN15CVietnam_Player15CreateViewModelEi");
     StartPrepSDKCall(SDKCall_Player);
     PrepSDKCall_SetAddress(createviewmodel);
     PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
@@ -174,11 +223,23 @@ public void OnPluginStart()
     PrepSDKCall_SetAddress(stopfollowingentity);
     g_hCBaseEntityStopFollowingEntity = EndPrepSDKCall();
 
-    Address cvietname_playersetmodel     = g_pServerLib.ResolveSymbol("_ZN15CVietnam_Player8SetModelEPKc");
+    Address cvietname_playersetmodel  = g_pServerLib.ResolveSymbol("_ZN15CVietnam_Player8SetModelEPKc");
     StartPrepSDKCall(SDKCall_Player);
     PrepSDKCall_SetAddress(cvietname_playersetmodel);
     PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
-    g_hCVietnam_PlayerSetModel = EndPrepSDKCall();
+    g_hCVietnam_PlayerSetModel         = EndPrepSDKCall();
+
+    Address cvietname_playerweaponhide = g_pServerLib.ResolveSymbol("_ZN15CVietnam_Player11Weapon_HideEPKc");
+    StartPrepSDKCall(SDKCall_Player);
+    PrepSDKCall_SetAddress(cvietname_playerweaponhide);
+    PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+    g_hCVietnam_PlayerWeapon_Hide        = EndPrepSDKCall();
+
+    Address cvietname_playerweaponunhide = g_pServerLib.ResolveSymbol("_ZN15CVietnam_Player13Weapon_UnhideEPKc");
+    StartPrepSDKCall(SDKCall_Player);
+    PrepSDKCall_SetAddress(cvietname_playerweaponunhide);
+    PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+    g_hCVietnam_PlayerWeapon_Unhide = EndPrepSDKCall();
 
     ZM_OnPluginStart();
 }
@@ -187,17 +248,17 @@ public void OnPluginEnd()
 {
     g_pServerLib.Close();
 
-    g_hSetParentAttachment.Close();
-
-    g_hCBasePlayerGetViewModel.Close();
+    g_hCBaseViewModelGetOwningWeapon.Close();
     g_hCBasePlayerCreateViewModel.Close();
-
+    g_hCBasePlayerGetViewModel.Close();
+    g_hCVietnam_PlayerSetModel.Close();
+    g_hCVietnam_PlayerWeapon_Hide.Close();
+    g_hCVietnam_PlayerWeapon_Unhide.Close();
+    g_hSetParentAttachment.Close();
     g_hCBaseEntityFollowEntity.Close();
     g_hCBaseEntityGetFollowedEntity.Close();
     g_hCBaseEntityIsFollowingEntity.Close();
     g_hCBaseEntityStopFollowingEntity.Close();
-
-    g_hCVietnam_PlayerSetModel.Close();
 
     ZM_OnPluginEnd();
 }
