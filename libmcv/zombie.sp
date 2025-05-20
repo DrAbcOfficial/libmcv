@@ -1,14 +1,14 @@
 // 玩家金币维护
 // undefined4 __thiscall CVietnam_Player::GetCredits(CVietnam_Player *this)
 // {
-//   return *(undefined4 *)(this + 0x21d8);
+//   return *(undefined4 *)(this + 0x21e4);
 // }
 public int Native_GetMoney(Handle plugin, int args)
 {
     int client = GetNativeCell(1);
     if (MCV_IsClientValid(client))
     {
-        int money = GetEntData(client, 0x21d8);
+        int money = GetEntData(client, 0x21e4);
         return money;
     }
     return INVALID_ENT_REFERENCE;
@@ -20,7 +20,7 @@ public int Native_SetMoney(Handle plugin, int args)
     if (MCV_IsClientValid(client))
     {
         int money = GetNativeCell(2);
-        SetEntData(client, 0x21d8, money);
+        SetEntData(client, 0x21e4, money);
     }
     return INVALID_ENT_REFERENCE;
 }
@@ -30,9 +30,9 @@ public int Native_AddMoney(Handle plugin, int args)
     int client = GetNativeCell(1);
     if (MCV_IsClientValid(client))
     {
-        int money = GetEntData(client, 0x21d8);
+        int money = GetEntData(client, 0x21e4);
         int add   = GetNativeCell(2);
-        SetEntData(client, 0x21d8, money + add);
+        SetEntData(client, 0x21e4, money + add);
     }
     return INVALID_ENT_REFERENCE;
 }
@@ -40,14 +40,14 @@ public int Native_AddMoney(Handle plugin, int args)
 // 玩家重量维护
 // undefined4 __thiscall CVietnam_Player::GetCarriedWeaponsWeight(CVietnam_Player *this)
 //{
-//  return *(undefined4 *)(this + 0x21dc);
+//  return *(undefined4 *)(this + 0x21e8);
 //}
 public int Native_GetWeight(Handle plugin, int args)
 {
     int client = GetNativeCell(1);
     if (MCV_IsClientValid(client))
     {
-        int weight = GetEntData(client, 0x21dc);
+        int weight = GetEntData(client, 0x21e8);
         return weight;
     }
     return INVALID_ENT_REFERENCE;
@@ -59,7 +59,7 @@ public int Native_SetWeight(Handle plugin, int args)
     if (MCV_IsClientValid(client))
     {
         int weight = GetNativeCell(2);
-        SetEntData(client, 0x21dc, weight);
+        SetEntData(client, 0x21e8, weight);
     }
     return INVALID_ENT_REFERENCE;
 }
@@ -69,9 +69,9 @@ public int Native_AddWeight(Handle plugin, int args)
     int client = GetNativeCell(1);
     if (MCV_IsClientValid(client))
     {
-        int weight = GetEntData(client, 0x21dc);
+        int weight = GetEntData(client, 0x21e8);
         int add    = GetNativeCell(2);
-        SetEntData(client, 0x21dc, weight + add);
+        SetEntData(client, 0x21e8, weight + add);
     }
     return INVALID_ENT_REFERENCE;
 }
